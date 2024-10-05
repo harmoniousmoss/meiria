@@ -1,0 +1,49 @@
+# Binaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Output of the Go compiler
+*.o
+*.a
+
+# Test binary, created during `go test`
+*.test
+
+# Directories
+/vendor/
+/bin/
+/dist/
+/build/
+
+# Dependency directories (vendor)
+vendor/
+
+# Go modules
+/go.sum
+/go.mod
+
+# IDE/editor directories and settings
+.idea/
+.vscode/
+*.swp
+
+# Log files
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Fiber specific
+fiber.lock
+
+# Coverage files
+*.out
+
+# Docker specific
+docker-compose.override.yml
+
+# Ignore env files for security reasons
+.env
