@@ -1,0 +1,75 @@
+<!--views/index.html-->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Internet Speed Test</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Your Public IP: <span id="public-ip">Loading...</span></h1>
+
+        <div id="progress-section">
+            <div class="progress-container">
+                <p>Testing Download Speed...</p>
+                <div class="progress-bar" id="download-progress"></div>
+            </div>
+
+            <div id="download-result" class="result">Download Speed: <span id="download-speed">-</span></div>
+
+            <div class="progress-container">
+                <p>Testing Upload Speed...</p>
+                <div class="progress-bar" id="upload-progress"></div>
+            </div>
+
+            <div id="upload-result" class="result">Upload Speed: <span id="upload-speed">-</span></div>
+        </div>
+    </div>
+
+    <script>
+        // Function to simulate progress bar for download/upload test
+        function simulateProgressBar(progressBarId, callback) {
+            let progressBar = document.getElementById(progressBarId);
+            let width = 0;
+            let interval = setInterval(() => {
+                if (width >= 100) {
+                    clearInterval(interval);
+                    callback();  // Call the callback once the progress is complete
+                } else {
+                    width++;
+                    progressBar.style.width = width + '%';
+                }
+            }, 50);  // Simulate progress
+        }
+
+        // Function to fetch speed test results
+        async function fetchSpeedTestResults() {
+            // Fetch the data from the server (fetch request to your backend)
+            const response = await fetch('/api/speedtest');
+            const data = await response.json();
+
+            // Display the public IP
+            document.getElementById('public-ip').textContent = data.ip_address;
+
+            // Display the download speed after the progress bar fills
+            simulateProgressBar('download-progress', () => {
+                document.getElementById('download-speed').textContent = data.download_speed;
+
+                // After download test finishes, start the upload test
+                simulateProgressBar('upload-progress', () => {
+                    document.getElementById('upload-speed').textContent = data.upload_speed;
+                });
+            });
+        }
+
+        // Start the process when the page is fully loaded
+        document.addEventListener('DOMContentLoaded', fetchSpeedTestResults);
+    </script>
+</body>
+
+</html>
