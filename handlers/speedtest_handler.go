@@ -1,79 +1,40 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/showwin/speedtest-go/speedtest"
 )
-
-type SpeedTestResult struct {
-	DownloadSpeed string `json:"download_speed"`
-	UploadSpeed   string `json:"upload_speed"`
-	IPAddress     string `json:"ip_address"`
-}
-
-// getPublicIP fetches the public IP address of the user
-func getPublicIP() (string, error) {
-	resp, err := http.Get("https://api.ipify.org?format=text")
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	ip := ""
-	_, err = fmt.Fscanf(resp.Body, "%s", &ip)
-	if err != nil {
-		return "", err
-	}
-
-	return ip, nil
-}
 
 // SpeedTestHandler performs the actual speed test and returns the results
 func SpeedTestHandler(c *fiber.Ctx) error {
 	// Get public IP (using an external service)
-	ipAddress, err := getPublicIP()
+	ipAddress, err := GetPublicIP()
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString("Failed to get public IP")
 	}
 
 	// Fetch available speed test servers
-	servers, err := speedtest.FetchServers()
+	servers, err := FetchAvailableServers()
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).SendString("Failed to fetch servers")
+		return c.Status(http.StatusInternalServerError).SendString("Failed to fetch speed test servers")
 	}
 
-	// Select the best server based on latency
-	targets, err := servers.FindServer([]int{})
-	if err != nil || len(targets) == 0 {
-		return c.Status(http.StatusInternalServerError).SendString("Failed to find target servers")
-	}
-
-	// Perform speed tests on each target server
-	for _, s := range targets {
-		// Perform ping test with a callback for logging latency
-		s.PingTest(func(latency time.Duration) {
-			fmt.Printf("Ping: %v\n", latency)
-		})
-
-		// Perform download and upload tests
-		s.DownloadTest()
-		s.UploadTest()
-
-		// Create result structure
-		result := SpeedTestResult{
-			DownloadSpeed: fmt.Sprintf("%.2f Mbps", s.DLSpeed),
-			UploadSpeed:   fmt.Sprintf("%.2f Mbps", s.ULSpeed),
-			IPAddress:     ipAddress,
+	// Perform speed test on the first server (remove the loop)
+	if len(servers) > 0 {
+		s := servers[0]
+		result, err := RunSpeedTest(s)
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).SendString("Failed to perform speed test")
 		}
 
-		// Return JSON result to the client
+		// Add public IP to the result
+		result.IPAddress = ipAddress
+
+		// Return the JSON result
 		return c.JSON(result)
 	}
 
-	// If no server tests were run, return an error
+	// If no servers are available
 	return c.Status(http.StatusInternalServerError).SendString("Failed to perform speed test")
 }
