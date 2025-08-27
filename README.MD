@@ -1,6 +1,6 @@
-# SpeedyTest
+# Meiria - Internet Speed Testing Tool
 
-SpeedyTest is a sleek, real-time internet speed testing web application built with Go and the Fiber web framework. It leverages the speedtest-go package to perform accurate download, upload, and ping tests, displaying results with interactive progress bars and a user-friendly interface. The app also fetches the user's public IP and provides detailed speed insights in real-time.
+Meiria is a web application that tests internet speed and displays results with progress indicators. Built with Go and Fiber framework, featuring real-time speed measurements for download/upload speeds and IP detection. Clean interface with interactive progress bars for better user experience.
 
 # Features:
 - Accurate download, upload, and ping tests.
